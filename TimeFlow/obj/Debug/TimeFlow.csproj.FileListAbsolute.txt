@@ -1,0 +1,5 @@
+D:\Workshop\StardewValley\TimeFlow\TimeFlow\TimeFlow\obj\Debug\TimeFlow.csprojResolveAssemblyReference.cache
+D:\Workshop\StardewValley\TimeFlow\TimeFlow\TimeFlow\bin\Debug\TimeFlow.dll
+D:\Workshop\StardewValley\TimeFlow\TimeFlow\TimeFlow\bin\Debug\TimeFlow.pdb
+D:\Workshop\StardewValley\TimeFlow\TimeFlow\TimeFlow\obj\Debug\TimeFlow.dll
+D:\Workshop\StardewValley\TimeFlow\TimeFlow\TimeFlow\obj\Debug\TimeFlow.pdb
