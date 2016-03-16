@@ -19,10 +19,10 @@ namespace TimeFlow
             TimeFlowConfig = new ModConfig();
             TimeFlowConfig = (ModConfig)Config.InitializeConfig(PathOnDisk + "\\Config.json", TimeFlowConfig);
             /*
-            Console.WriteLine("The config file for TimeFlow has been loaded.\n"+
-                "\n\tTickIntervalOutside: {0}"+
-                "\n\tTickIntervalInside: {1}"+
-                "\n\tTickIntervalInMines: {2}"+
+            Console.WriteLine("The config file for TimeFlow has been loaded.\n" +
+                "\n\tTickIntervalOutside: {0}" +
+                "\n\tTickIntervalInside: {1}" +
+                "\n\tTickIntervalInMines: {2}" +
                 "\n\tFreezeTimeInMines: {3}",
                 TimeFlowConfig.TickIntervalOutdoors, TimeFlowConfig.TickIntervalIndoors, TimeFlowConfig.TickIntervalInMines, TimeFlowConfig.FreezeTimeInMines);
             Console.WriteLine("\nTimeFlow Initialization Completed");
@@ -49,7 +49,7 @@ namespace TimeFlow
             if (@event.Root.DayOfMonth != null && @event.Root.CurrentSeason != null)
             {
                 timeCounter += Math.Abs((@event.Root.GameTimeInterval - lastGameTimeInterval));
-                double fraction = Math.Abs(timeCounter / TenMinuteTickInterval);
+                double fraction = (timeCounter / TenMinuteTickInterval);
                 double proportion;
 
                 if (!@event.Root.CurrentLocation.IsOutdoors)
@@ -57,21 +57,21 @@ namespace TimeFlow
                     {
                         case "UndergroundMine":
                         case "FarmCave":
-                            timeCounter = (!TenMinuteTickInterval.Equals(TimeFlowConfig.TickIntervalInMines)) ? Math.Abs(TimeFlowConfig.TickIntervalInMines * fraction) : timeCounter;
+                            timeCounter = (!TimeFlowConfig.TickIntervalInMines.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalInMines * fraction) : timeCounter;
                             TenMinuteTickInterval = TimeFlowConfig.TickIntervalInMines;
                             break;
                         default:
-                            timeCounter = (!TenMinuteTickInterval.Equals(TimeFlowConfig.TickIntervalIndoors)) ? Math.Abs(TimeFlowConfig.TickIntervalIndoors * fraction) : timeCounter;
+                            timeCounter = (!TimeFlowConfig.TickIntervalIndoors.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalIndoors * fraction) : timeCounter;
                             TenMinuteTickInterval = TimeFlowConfig.TickIntervalIndoors;
                             break;
                     }
                 else
                 {
-                    timeCounter = (!TenMinuteTickInterval.Equals(TimeFlowConfig.TickIntervalOutdoors)) ? Math.Abs(TimeFlowConfig.TickIntervalOutdoors * fraction) : timeCounter;
+                    timeCounter = (!TimeFlowConfig.TickIntervalOutdoors.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalOutdoors * fraction) : timeCounter;
                     TenMinuteTickInterval = TimeFlowConfig.TickIntervalOutdoors;
                 }
 
-                proportion = Math.Abs(7 * timeCounter / TenMinuteTickInterval);
+                proportion = (7 * timeCounter / TenMinuteTickInterval);
                 @event.Root.GameTimeInterval = Convert.ToInt32(proportion);
                 lastGameTimeInterval = @event.Root.GameTimeInterval;
                 /*
