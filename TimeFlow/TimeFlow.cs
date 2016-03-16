@@ -19,7 +19,6 @@ namespace TimeFlow
         {
             TimeFlowConfig = new ModConfig();
             TimeFlowConfig = (ModConfig)Config.InitializeConfig(PathOnDisk + "\\Config.json", TimeFlowConfig);
-            /*
             Console.WriteLine("The config file for TimeFlow has been loaded."+
                 "\n\tTickIntervalOutside: {0}"+
                 "\n\tTickIntervalInside: {1}"+
@@ -27,14 +26,13 @@ namespace TimeFlow
                 "\n\tFreezeTimeInMines: {3}",
                 TimeFlowConfig.TickIntervalOutside, TimeFlowConfig.TickIntervalInside, TimeFlowConfig.TickIntervalInMines, TimeFlowConfig.FreezeTimeInMines);
             Console.WriteLine("TimeFlow Initialization Completed");
-            */
             TenMinuteTickInterval = TimeFlowConfig.TickIntervalInside;
         }
 
         [Subscribe]
         public void Pre10MinuteClockUpdateCallback(Pre10MinuteClockUpdateEvent @event)
         {
-            //Console.WriteLine("TimeFlow : 10MinuteClockUpdate : " + DateTime.Now.ToString("HH:mm:ss.ffff"));
+            Console.WriteLine("TimeFlow : 10MinuteClockUpdate : " + DateTime.Now.ToString("HH:mm:ss.ffff"));
             var location = @event.Root.CurrentLocation;
             if (location != null && !location.IsOutdoors && ((location.Name.Equals("UndergroundMine") || location.Name.Equals("FarmCave")) && TimeFlowConfig.FreezeTimeInMines))
             {
@@ -51,51 +49,41 @@ namespace TimeFlow
             {
                 timeCounter += Math.Abs((@event.Root.GameTimeInterval - lastGameTimeInterval));
                 double fraction = Math.Abs(timeCounter / TenMinuteTickInterval);
-                if (LocationChangeCheck(@event.Root.CurrentLocation.Name, @event.Root.CurrentLocation.IsOutdoors))
-                {
-                    timeCounter = Math.Abs(TenMinuteTickInterval * fraction);
-                    /*
-                    Console.WriteLine("TimeFlow : LocationChange : " + @event.Root.CurrentLocation.Name+
-                        " : TickInterval = " + TenMinuteTickInterval.ToString()+
-                        " : " + DateTime.Now.ToString("HH:mm:ss.ffff"));
-                    */
-                }
-                double proportion = Math.Abs(7 * timeCounter / TenMinuteTickInterval);
-                @event.Root.GameTimeInterval = Convert.ToInt32(proportion);
-                lastGameTimeInterval = @event.Root.GameTimeInterval;
-            }
-        }
+                double proportion;
 
-        public bool LocationChangeCheck(string sName, bool bOutside)
-        {
-            if (!sName.Equals(lastLocationName))
-            {
-                if (!bOutside)
-                {
-                    switch (sName)
+                if (!@event.Root.CurrentLocation.IsOutdoors)
+                    switch (@event.Root.CurrentLocation.Name)
                     {
                         case "UndergroundMine":
                         case "FarmCave":
-                            TenMinuteTickInterval = TimeFlowConfig.TickIntervalInMines;
-                            //Console.WriteLine("LocationChangeCheck : TickIntervalInMines");
+                            timeCounter = Math.Abs(TimeFlowConfig.TickIntervalInMines * fraction);
+                            proportion = Math.Abs(7 * timeCounter / TimeFlowConfig.TickIntervalInMines);
                             break;
                         default:
-                            TenMinuteTickInterval = TimeFlowConfig.TickIntervalInside;
-                            //Console.WriteLine("LocationChangeCheck : TickIntervalInside");
+                            timeCounter = Math.Abs(TimeFlowConfig.TickIntervalInside * fraction);
+                            proportion = Math.Abs(7 * timeCounter / TimeFlowConfig.TickIntervalInside);
                             break;
                     }
-                }
                 else
                 {
-                    TenMinuteTickInterval = TimeFlowConfig.TickIntervalOutside;
-                    //Console.WriteLine("LocationChangeCheck : TickIntervalOutside");
+                    timeCounter = Math.Abs(TimeFlowConfig.TickIntervalOutside * fraction);
+                    proportion = Math.Abs(7 * timeCounter / TimeFlowConfig.TickIntervalOutside);
                 }
-                lastLocationName = sName;
-                return true;
-            }
-            else
-            {
-                return false;
+                @event.Root.GameTimeInterval = Convert.ToInt32(proportion);
+                lastGameTimeInterval = @event.Root.GameTimeInterval;
+                if (proportion % 10 == 0)
+                    Console.WriteLine("TimeFlow : " + @event.Root.CurrentLocation.Name+
+                        " : " + Convert.ToInt32(proportion).ToString() + "/7000"+
+                        " : " + DateTime.Now.ToString("HH:mm:ss.ffff"));
+                /*
+                if (LocationChangeCheck(@event.Root.CurrentLocation.Name, @event.Root.CurrentLocation.IsOutdoors))
+                {
+                    timeCounter = Math.Abs(TenMinuteTickInterval * fraction);
+                    Console.WriteLine("TimeFlow : LocationChange : " + @event.Root.CurrentLocation.Name+
+                        " : TickInterval = " + TenMinuteTickInterval.ToString()+
+                        " : " + DateTime.Now.ToString("HH:mm:ss.ffff"));
+                }
+                */
             }
         }
     }
