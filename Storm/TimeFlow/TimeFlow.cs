@@ -3,6 +3,7 @@ using Storm;
 using Storm.ExternalEvent;
 using Storm.StardewValley.Event;
 
+
 namespace TimeFlow
 {
     [Mod]
@@ -12,33 +13,37 @@ namespace TimeFlow
         public double timeCounter = 0;
         public double lastGameTimeInterval = 0;
         public int TenMinuteTickInterval = 7;
+        public bool FreezeTimeToggle = false;
 
         [Subscribe]
         public void InitializeCallback(InitializeEvent @event)
         {
             TimeFlowConfig = new ModConfig();
             TimeFlowConfig = (ModConfig)Config.InitializeConfig(PathOnDisk + "\\Config.json", TimeFlowConfig);
-            /*
+#if DEBUG
             Console.WriteLine("The config file for TimeFlow has been loaded.\n" +
-                "\n\tTickIntervalOutside: {0}" +
-                "\n\tTickIntervalInside: {1}" +
-                "\n\tTickIntervalInMines: {2}" +
-                "\n\tFreezeTimeInMines: {3}",
-                TimeFlowConfig.TickIntervalOutdoors, TimeFlowConfig.TickIntervalIndoors, TimeFlowConfig.TickIntervalInMines, TimeFlowConfig.FreezeTimeInMines);
+                "\n\tTickIntervalOutdoors: {0}" +
+                "\n\tTickIntervalIndoors: {1}" +
+                "\n\tTickIntervalFarmIndoors: {2}" +
+                "\n\tTickIntervalInMines: {3}" +
+                "\n\tFreezeTimeToggleKey: {4}",
+                TimeFlowConfig.TickIntervalOutdoors, TimeFlowConfig.TickIntervalIndoors, TimeFlowConfig.TickIntervalFarmIndoors,
+                TimeFlowConfig.TickIntervalInMines, TimeFlowConfig.FreezeTimeToggleKey);
             Console.WriteLine("\nTimeFlow Initialization Completed");
-            */
+#endif
             TenMinuteTickInterval = TimeFlowConfig.TickIntervalIndoors;
         }
 
         [Subscribe]
         public void Pre10MinuteClockUpdateCallback(Pre10MinuteClockUpdateEvent @event)
         {
-            //Console.WriteLine("TimeFlow : 10MinuteClockUpdate : " + DateTime.Now.ToString("HH:mm:ss.ffff"));
+#if DEBUG
+            Console.WriteLine("TimeFlow : 10MinuteClockUpdate : " + DateTime.Now.ToString("HH:mm:ss.ffff") +
+                "\n\tFreezeTimeToggle : " + FreezeTimeToggle.ToString());
+#endif
             var location = @event.Root.CurrentLocation;
-            if (location != null && !location.IsOutdoors && ((location.Name.Equals("UndergroundMine") || location.Name.Equals("FarmCave")) && TimeFlowConfig.FreezeTimeInMines))
-            {
+            if (location != null && FreezeTimeToggle)
                 @event.ReturnEarly = true;
-            }
             timeCounter = 0;
             lastGameTimeInterval = 0;
         }
@@ -55,8 +60,14 @@ namespace TimeFlow
                 if (!@event.Root.CurrentLocation.IsOutdoors)
                     switch (@event.Root.CurrentLocation.Name)
                     {
-                        case "UndergroundMine":
+                        case "Coop":
+                        case "Barn":
                         case "FarmCave":
+                        case "FarmHouse":
+                            timeCounter = (!TimeFlowConfig.TickIntervalFarmIndoors.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalFarmIndoors * fraction) : timeCounter;
+                            TenMinuteTickInterval = TimeFlowConfig.TickIntervalFarmIndoors;
+                            break;
+                        case "UndergroundMine":
                             timeCounter = (!TimeFlowConfig.TickIntervalInMines.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalInMines * fraction) : timeCounter;
                             TenMinuteTickInterval = TimeFlowConfig.TickIntervalInMines;
                             break;
@@ -74,13 +85,24 @@ namespace TimeFlow
                 proportion = (7 * timeCounter / TenMinuteTickInterval);
                 @event.Root.GameTimeInterval = Convert.ToInt32(proportion);
                 lastGameTimeInterval = @event.Root.GameTimeInterval;
-                /*
+#if DEBUG
                 if (lastGameTimeInterval % 100 == 0)
                     Console.WriteLine("TimeFlow : " + @event.Root.CurrentLocation.Name + " : " + DateTime.Now.ToString("HH:mm:ss.ffff") +
                         "\n\ttimeCounter : " + Convert.ToInt32(timeCounter).ToString() + "/" + (TenMinuteTickInterval * 1000).ToString() +
-                        "\n\tproportion : " + Convert.ToInt32(proportion).ToString() + "/7000");
-                */
+                        "\n\tproportion : " + Convert.ToInt32(proportion).ToString() + "/7000" +
+                        "\n\tTimeOfDay : " + @event.Root.TimeOfDay.ToString("G"));
+#endif
             }
+    }
+
+        [Subscribe]
+        public void KeyPressedCallback(KeyPressedEvent @event)
+        {
+#if DEBUG
+            Console.WriteLine("TimeFlow : KeyPressed : " + @event.Key.ToString());
+#endif
+            if (@event.Key.ToString().Equals(TimeFlowConfig.FreezeTimeToggleKey))
+                FreezeTimeToggle = (FreezeTimeToggle) ? false : true;
         }
     }
 
@@ -88,15 +110,17 @@ namespace TimeFlow
     {
         public int TickIntervalOutdoors { get; set; }
         public int TickIntervalIndoors { get; set; }
+        public int TickIntervalFarmIndoors { get; set; }
         public int TickIntervalInMines { get; set; }
-        public bool FreezeTimeInMines { get; set; }
+        public string FreezeTimeToggleKey { get; set; }
 
         public override Config GenerateBaseConfig(Config baseConfig)
         {
             TickIntervalOutdoors = 21;
             TickIntervalIndoors = 28;
+            TickIntervalFarmIndoors = 35;
             TickIntervalInMines = 35;
-            FreezeTimeInMines = false;
+            FreezeTimeToggleKey = "Pause";
 
             return this;
         }

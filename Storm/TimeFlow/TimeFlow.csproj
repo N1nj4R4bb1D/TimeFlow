@@ -44,10 +44,6 @@
       <HintPath>..\..\..\..\..\Games\Stardew Valley\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Stardew Valley">
-      <HintPath>..\..\..\..\..\Games\Stardew Valley\Stardew Valley.exe</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="StormLoader">
       <HintPath>..\..\..\..\..\Games\Stardew Valley\StormLoader.exe</HintPath>
       <Private>False</Private>

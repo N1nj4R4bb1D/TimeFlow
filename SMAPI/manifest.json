@@ -1,0 +1,12 @@
+{
+  "Name": "TimeFlow",
+  "Authour": "N1nj4R4bb1D",
+  "Version": {
+    "MajorVersion": 1,
+    "MinorVersion": 0,
+    "PatchVersion": 0,
+    "Build": ""
+  },
+  "Description": "",
+  "EntryDll": "TimeFlow.dll"
+}

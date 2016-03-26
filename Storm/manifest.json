@@ -1,0 +1,8 @@
+﻿{
+    "displayName": "TimeFlow",
+    "author": "N1nj4R4bb1D",
+    "version": "1.0.0.0",
+    "description": "Goes in %appdata% StardewValley/Mods/TimeFlow with your dll.",
+
+    "assemblyFileName": "TimeFlow.dll"
+}
