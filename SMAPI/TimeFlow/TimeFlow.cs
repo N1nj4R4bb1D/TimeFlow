@@ -17,28 +17,28 @@ namespace TimeFlow
         public override void Entry(params object[] objects)
         {
             TimeFlowConfig = new ModConfig().InitializeConfig(BaseConfigPath);
-            Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss") + "] TimeFlow : Loaded");
-            ControlEvents.KeyPressed += Event_KeyPressed;
             TimeEvents.DayOfMonthChanged += Event_DayOfMonthChanged;
             TimeEvents.TimeOfDayChanged += Event_TimeOfDayChanged;
             GameEvents.UpdateTick += Event_UpdateTick;
+            ControlEvents.KeyPressed += Event_KeyPressed;
+            Log.Verbose("TimeFlow Loaded");
         }
 
-        public void Event_DayOfMonthChanged(object sender, EventArgs e)
+        private void Event_DayOfMonthChanged(object sender, EventArgs e)
         {
             Game1.gameTimeInterval = 0;
-            timeCounter = 0;
             lastGameTimeInterval = 0;
+            timeCounter = 0;
         }
 
-        public void Event_TimeOfDayChanged(object sender, EventArgs e)
+        private void Event_TimeOfDayChanged(object sender, EventArgs e)
         {
             Game1.gameTimeInterval = 0;
-            timeCounter = 0;
             lastGameTimeInterval = 0;
+            timeCounter = 0;
         }
 
-        public void Event_UpdateTick(object sender, EventArgs e)
+        private void Event_UpdateTick(object sender, EventArgs e)
         {
             if (Game1.currentLocation != null)
             {
@@ -59,6 +59,7 @@ namespace TimeFlow
                             case "Barn":
                             case "FarmCave":
                             case "FarmHouse":
+                            case "Greenhouse":
                                 timeCounter = (!TimeFlowConfig.TickIntervalFarmIndoors.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalFarmIndoors * fraction) : timeCounter;
                                 TenMinuteTickInterval = TimeFlowConfig.TickIntervalFarmIndoors;
                                 break;
@@ -82,7 +83,7 @@ namespace TimeFlow
                     lastGameTimeInterval = Game1.gameTimeInterval;
 #if DEBUG
                     if (lastGameTimeInterval % 100 == 0)
-                        Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss") + "] TimeFlow : " + Game1.currentLocation.Name +
+                        Log.Verbose("TimeFlow : " + Game1.currentLocation.Name +
                             "\n\ttimeCounter : " + Convert.ToInt32(timeCounter).ToString() + "/" + (TenMinuteTickInterval * 1000).ToString() +
                             "\n\tproportion : " + Convert.ToInt32(proportion).ToString() + "/7000" +
                             "\n\tTimeOfDay : " + Game1.timeOfDay.ToString("G"));
@@ -91,17 +92,24 @@ namespace TimeFlow
             }
         }
 
-        void Event_KeyPressed(object sender, EventArgsKeyPressed e)
+        private void Event_KeyPressed(object sender, EventArgsKeyPressed e)
         {
-#if DEBUG
-            //Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss") + "] TimeFlow : KeyPressed : " + e.KeyPressed.ToString());
-#endif
             if (e.KeyPressed.ToString().Equals(TimeFlowConfig.FreezeTimeToggleKey))
             {
                 FreezeTimeToggle = (FreezeTimeToggle) ? false : true;
                 string message = (FreezeTimeToggle) ? "Time flow frozen..." : "Time flow thawed...";
                 Game1.showGlobalMessage(message);
             }
+#if DEBUG
+            else if (e.KeyPressed.ToString().Equals("Add") && !Game1.timeOfDay.Equals(200))
+            {
+                Game1.timeOfDay += (Game1.timeOfDay % 50 == 0 && Game1.timeOfDay % 100 != 0) ? 50 : 10;
+                Game1.gameTimeInterval = 0;
+                lastGameTimeInterval = 0;
+                timeCounter = 0;
+                Game1.showGlobalMessage("Time advanced by 10 minutes...");
+            }
+#endif
         }
     }
 

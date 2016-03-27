@@ -64,6 +64,7 @@ namespace TimeFlow
                         case "Barn":
                         case "FarmCave":
                         case "FarmHouse":
+                        case "Greenhouse":
                             timeCounter = (!TimeFlowConfig.TickIntervalFarmIndoors.Equals(TenMinuteTickInterval)) ? (TimeFlowConfig.TickIntervalFarmIndoors * fraction) : timeCounter;
                             TenMinuteTickInterval = TimeFlowConfig.TickIntervalFarmIndoors;
                             break;
@@ -98,11 +99,17 @@ namespace TimeFlow
         [Subscribe]
         public void KeyPressedCallback(KeyPressedEvent @event)
         {
-#if DEBUG
-            Console.WriteLine("TimeFlow : KeyPressed : " + @event.Key.ToString());
-#endif
             if (@event.Key.ToString().Equals(TimeFlowConfig.FreezeTimeToggleKey))
                 FreezeTimeToggle = (FreezeTimeToggle) ? false : true;
+#if DEBUG
+            else if (@event.Key.ToString().Equals("Add") && !@event.Root.TimeOfDay.Equals(200))
+            {
+                @event.Root.TimeOfDay += (@event.Root.TimeOfDay % 50 == 0 && @event.Root.TimeOfDay % 100 != 0) ? 50 : 10;
+                @event.Root.GameTimeInterval = 0;
+                lastGameTimeInterval = 0;
+                timeCounter = 0;
+            }
+#endif
         }
     }
 

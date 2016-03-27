@@ -7,6 +7,8 @@
     "PatchVersion": 0,
     "Build": ""
   },
-  "Description": "",
+  "Description": "Time flow control mod.",
+  "UniqueID": "9e536529-c426-4cd2-a056-4ae43aa80bc9",
+  "PerSaveConfigs": false,
   "EntryDll": "TimeFlow.dll"
 }
